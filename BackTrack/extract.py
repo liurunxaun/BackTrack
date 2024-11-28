@@ -42,6 +42,7 @@ def extract(question):
     """
 
     response = llm.spark_4_0(query)
+    print(f"大模型返回:\n{response}\n")
 
     conditions = []
     aims = []

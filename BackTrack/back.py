@@ -187,7 +187,7 @@ def reverse_and_remove_root(paths):
     return processed_paths
 
 
-def back(conditions, aims, max_pop, schema):
+def aim_back(conditions, aims, max_pop, label_dict):
     """
     倒退找推理路径
     输入：条件[[entity, label]]，目的[[entity, label]]
@@ -197,15 +197,13 @@ def back(conditions, aims, max_pop, schema):
                 输入：当前路径，向上阶数
                 如果达到上限，return.else:
                 到表中查找出现在同一个关系的另外一个label
-                如果找到的label在条件内，将label append到当前路径内，并将当前路径添加到path内 todo:后期可以考虑效率更高的存储方式
+                如果找到的label在条件内，将label append到当前路径内，并将当前路径添加到path内
                 输出：none。（找到的路径直接存储在path中了）
     输出：找到的所有推理路径
     """
     final_paths = []
 
-    label_dict = build_label_dict(schema)
-
-    # 构造路径树，第0层1个节点是root，第1层是所有目的实体类型，然后调用upFind向上寻找路径
+    # 1. 构造路径树，第0层1个节点是root，第1层是所有目的实体类型，然后调用upFind向上寻找路径
     root = Node("root")
     for aim in aims:
         if aim[1] != 'none':
@@ -214,32 +212,30 @@ def back(conditions, aims, max_pop, schema):
         # print(child.name)
         pop = 1
         upFind(child, pop, max_pop, label_dict)
-
     # 使用 DotExporter 输出树的结构
     # DotExporter(root).to_picture("./output/reason_tree/tree.png")
     
-    # 然后进行剪枝，深度优先搜索每条路径，去除重复的
+    # 2. 然后进行剪枝，深度优先搜索每条路径，去除回路
     prune_tree_repeat(root, set())
     # 使用 DotExporter 输出树的结构
     # DotExporter(root).to_picture("./output/reason_tree/prune_tree_repeat.png")
 
-    # 执行基于条件的路径剪枝
+    # 3. 执行基于条件的路径剪枝
     condition_labels = []
     for condition in conditions:
         condition_labels.append(condition[1])
-
     prune_tree_by_conditions(root, condition_labels)
     # 输出剪枝后的树
     # DotExporter(root).to_picture("./output/reason_tree/prune_tree_conditions.png")
 
-    # 生成所有深度优先路径
+    # 4. 生成所有深度优先路径
     all_paths = []
     dfs_paths(root, [], all_paths)
 
-    # 根据条件数组再次剪枝路径
+    # 5. 去除最后一个节点不在条件中的路径
     pruned_paths = prune_paths_by_conditions(all_paths, condition_labels)
 
-    # 反转路径并去掉 root 节点
+    # 6. 反转路径并去掉 root 节点
     final_paths = reverse_and_remove_root(pruned_paths)
 
     return final_paths

@@ -156,4 +156,36 @@ def forward(paths, conditions, driver, aims):
     result_str = display_merged_results(filtered_merged)  # 汇总合并过滤后的结果为一个字符串
 
     return result_str
+
+
+def rules_forward(rules, conditions, driver):
+
+    result_str = ""
+
+    forward_root = Node("forward_root") # 因为每一个节点的邻居中满足next_label条件的可能有多个，用树的形式来组织更好。
+
+    for path in rules:
+        condition_entity = ''
+
+        for condition in conditions:
+            if path[0] == condition[1]:
+                condition_entity = condition[0] # 这一条推理路径的条件实体名
+                break
+                # todo: 如果找不到呢
+
+        # 先把起始节点加入到结果中
+        if condition_entity != '':
+            condition_node = Node(condition_entity, parent=forward_root, label=path[0])
+
+        # Cypher查询
+        i = 0
+        neo4j_match(condition_node, driver, i, path)
+
+    # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
+
+    paths = dfs_paths(forward_root)  # 深度优先搜索所有路径
+    merged = merge_paths(paths)  # 按条件合并路径
+    result_str = display_merged_results(merged)  # 汇总合并过滤后的结果为一个字符串
+
+    return result_str
         
