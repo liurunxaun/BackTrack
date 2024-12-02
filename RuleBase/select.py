@@ -3,7 +3,7 @@
 # 可以说是两种筛选路径的方式
 # 但是把问题和所有待选路径一并直接交给大模型，或许会参考信息更多，效果更好
 
-from utils import llm_api as llm
+from utils.LLM import spark as llm
 import re
 
 

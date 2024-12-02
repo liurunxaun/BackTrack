@@ -64,13 +64,17 @@ def display_merged_results(merged):
     return result_str
 
 
-def neo4j_match(source_node, driver, i, path):
+def neo4j_match(source_node, driver, i, path, conditions):
     i = i + 1
     if i >= len(path):
         return
 
     source_name = source_node.name
     end_label = path[i]
+
+    # for condition in conditions:
+    #     if condition[1] == end_label:
+
 
     # 执行查询
     with driver.session() as session:
@@ -107,7 +111,7 @@ def neo4j_match(source_node, driver, i, path):
                 n = Node(neighbor, parent=source_node, label=path[i], parent_edge=relation)
 
             for child in source_node.children:
-                neo4j_match(child, driver, i, path)
+                neo4j_match(child, driver, i, path, conditions)
 
         else:
             # todo: 采用其他方式
@@ -132,21 +136,20 @@ def forward(paths, conditions, driver, aims):
     forward_root = Node("forward_root") # 因为每一个节点的邻居中满足next_label条件的可能有多个，用树的形式来组织更好。
 
     for path in paths:
-        condition_entity = ''
+        condition_entities = [] # 有可能条件中有多个相同label的实体
 
         for condition in conditions:
             if path[0] == condition[1]:
-                condition_entity = condition[0] # 这一条推理路径的条件实体名
-                break
+                condition_entities.append(condition[0]) # 这一条推理路径的条件实体名
                 # todo: 如果找不到呢
 
         # 先把起始节点加入到结果中
-        if condition_entity != '':
-            condition_node = Node(condition_entity, parent=forward_root, label=path[0])
-
-        # Cypher查询
-        i = 0
-        neo4j_match(condition_node, driver, i, path)
+        if len(condition_entities) != 0:
+            for condition_entity in condition_entities:
+                condition_node = Node(condition_entity, parent=forward_root, label=path[0])
+                # Cypher查询
+                i = 0
+                neo4j_match(condition_node, driver, i, path, conditions)
 
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 

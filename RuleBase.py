@@ -59,7 +59,7 @@ def main(question, max_pop, label_dict, driver):
 if __name__ == "__main__":
     question = "machine translation 领域有哪些论文"  # 用户输入的问题
     max_pop = 5  # 构建推理树时最大的推理跳数
-    schema_text_path = "data/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label:entity_name-relation-label:entity_name
+    schema_text_path = "data/IFLYTEC-NLP/GraphKnowledge/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label:entity_name-relation-label:entity_name
     label_dict = back.build_label_dict(schema_text_path)
 
     uri = "bolt://10.43.108.62:7687"  # Neo4j连接URI
