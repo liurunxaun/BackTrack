@@ -18,4 +18,4 @@ def gpt_4o_mini(system_content, user_content):
         ]
     )
 
-    return completion.choices[0].message
+    return completion.choices[0].message.content

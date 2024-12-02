@@ -64,7 +64,7 @@ def display_merged_results(merged):
     return result_str
 
 
-def neo4j_match(source_node, driver, i, path, conditions):
+def neo4j_match(source_node, driver, i, path, conditions, top_k):
     i = i + 1
     if i >= len(path):
         return
@@ -98,8 +98,8 @@ def neo4j_match(source_node, driver, i, path, conditions):
 
         # 如果邻居列表超过10条，从中随机选取10条
         # todo:考虑采用什么策略，选择路径。两种考量：1是有可能用户问“还有呢？”。2是选取相关的，用户最关心的
-        if len(neighbor_list) > 10:
-            sampled_neighbors = random.sample(neighbor_list, 10)
+        if len(neighbor_list) > top_k:
+            sampled_neighbors = random.sample(neighbor_list, top_k)
         else:
             sampled_neighbors = neighbor_list
 
@@ -111,14 +111,14 @@ def neo4j_match(source_node, driver, i, path, conditions):
                 n = Node(neighbor, parent=source_node, label=path[i], parent_edge=relation)
 
             for child in source_node.children:
-                neo4j_match(child, driver, i, path, conditions)
+                neo4j_match(child, driver, i, path, conditions, top_k)
 
         else:
             # todo: 采用其他方式
             return
 
 
-def forward(paths, conditions, driver, aims):
+def forward(paths, conditions, driver, aims, top_k):
     """
     输入：1.倒推得到的路径path[] 2.条件[]
     处理过程：
@@ -149,7 +149,7 @@ def forward(paths, conditions, driver, aims):
                 condition_node = Node(condition_entity, parent=forward_root, label=path[0])
                 # Cypher查询
                 i = 0
-                neo4j_match(condition_node, driver, i, path, conditions)
+                neo4j_match(condition_node, driver, i, path, conditions, top_k)
 
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 
@@ -161,7 +161,7 @@ def forward(paths, conditions, driver, aims):
     return result_str
 
 
-def rules_forward(rules, conditions, driver):
+def rules_forward(rules, conditions, driver, top_k):
 
     result_str = ""
 
@@ -182,7 +182,7 @@ def rules_forward(rules, conditions, driver):
 
         # Cypher查询
         i = 0
-        neo4j_match(condition_node, driver, i, path)
+        neo4j_match(condition_node, driver, i, path, conditions, top_k)
 
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 
