@@ -61,7 +61,7 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
         # Compute BERTScore
         cand = [final_answer]
         P, R, F1 = score(cand, ref, lang="en", verbose=True, model_type='bert-large-uncased',
-                         rescale_with_baseline=True)
+                         rescale_with_baseline=True, device='cuda')
 
         print(f"Precision: {P.mean():.4f}")
         print(f"Recall: {R.mean():.4f}")
@@ -117,9 +117,9 @@ if __name__ == "__main__":
     max_pop = 5  # 构建推理树时最大的推理跳数
     top_k = 5  # 如果一个实体满足next_label的邻居有多个，最多取top_k个
     model = "gpt-4o-mini"  # 选择生成最终答案使用的模型。包括：spark, gpt-4o-mini（提取条件和目的就使用spark，因为便宜，而且效果也还不错）
-    schema_text_path = "data/IFLYTEC-NLP/GraphKnowledge/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label:entity_name-relation-label:entity_name
-    output_dir = "/Users/liurunxuan/学习/科大讯飞实习/BackTrack/output"
-    test_dataset = "/Users/liurunxuan/学习/科大讯飞实习/BackTrack/data/IFLYTEC-NLP/test200/200_QA_多文档.csv"
+    schema_text_path = "./data/IFLYTEC-NLP/GraphKnowledge/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label:entity_name-relation-label:entity_name
+    output_dir = "./output"
+    test_dataset = "./data/IFLYTEC-NLP/test200/200_QA_多文档.csv"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     label_dict = back.build_label_dict(schema_text_path)
