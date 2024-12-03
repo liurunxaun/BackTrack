@@ -19,15 +19,44 @@ def select_rules(paths, question):
     print(f"paths_waited:{paths}")
 
     query = f"""
-    我会给你用户的问题，和一些可能用得到的推理路径。我需要你结合用户问题，筛选推理路径，并输出
-    用户输入的问题:{question}\n
-    待筛选推理路径:{paths}\n
-    下面是一些解释信息：
-    我用大模型从问题中提取出来了已知条件。并从已知条件出发，在我的领域知识图谱本体中深度优先搜索提取出了以这个条件的标签为起点的全部本体路径，作为推理路径。
-    我希望你从这些本体路径中筛选出回答问题可能会用到的路径。后面我会以这些推理路径为指导，到知识图谱中检索实体。
+        请根据用户提供的问题和给定的推理路径，筛选出与问题相关的推理路径。对于每个路径，只需要提取出相关部分，路径中不相关的部分可以省略。
+
+        用户问题: {question}
+        待筛选推理路径: {paths}
+
+        解释说明：
+        - 我已使用大模型从用户问题中提取出已知条件。
+        - 从这些已知条件出发，我在领域知识图谱中进行了深度优先搜索，提取出以条件标签为起点的所有推理路径。
+        - 每个路径都是从一个条件实体开始的，路径通过多个实体标签相连。
+
+        请根据以下标准筛选路径：
+        - 仅保留与问题相关的路径部分。例如，如果问题问的是“这篇论文使用了什么方法？”，则路径“标题->方法->领域”应该简化为“标题->方法”，因为领域信息不相关。
+        - 输出路径时只包含必要的部分，去除冗余的部分。
+        - 你可以选择截断路径，只保留前面部分。
+
+        请返回筛选后的推理路径。
     """
 
-    response = llm.spark_4_0(query)
+    query_English = f"""
+        Please filter the reasoning paths based on the user question and the given possible reasoning paths. For each path, only the relevant parts need to be included, and irrelevant parts can be omitted.
+
+        User question: {question}
+        Possible reasoning paths: {paths}
+
+        Explanation:
+        - I have used a large model to extract known conditions from the user question.
+        - Starting from these known conditions, I performed a depth-first search in the domain knowledge graph to extract all reasoning paths that start with the labels of these conditions.
+        - Each path begins with a condition entity, and the path connects multiple entity labels.
+
+        Please filter the paths according to the following criteria:
+        - Only keep the relevant parts of the path related to the question. For example, if the question asks “What method does this paper use?”, then the path “[标题,方法,领域]” should be simplified to “[标题,方法]”, as the 领域 information is not relevant.
+        - When returning the path, only include the necessary parts and omit redundant parts.
+        - You can truncate the path and only keep the earlier parts.
+
+        Please return the filtered reasoning paths.
+    """
+
+    response = llm.spark_4_0(query_English)
 
     pattern = r"\['(.*?)'\]"  # 匹配类似 ['领域', '标题', '方法'] 的结构
     matches = re.findall(pattern, response)

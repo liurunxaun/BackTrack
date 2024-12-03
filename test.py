@@ -8,23 +8,22 @@ import os
 from datetime import datetime
 
 
-def write_results(file_path, data):
-    """Write the results to a file"""
-    with open(file_path, "a") as f:
-        for entry in data:
-            f.write(entry + "\n")
+def write_results_to_csv(output_file, data):
+    """Write the results to a CSV file."""
+    df = pd.DataFrame(data)
+    df.to_csv(output_file, mode='a', header=not os.path.exists(output_file), index=False)
 
 
-def create_output_file(output_dir, timestamp):
-    """Create an output file with a timestamp to avoid overwriting."""
+def create_output_file(output_dir, method, model, max_pop, top_k, timestamp):
+    """Create an output file with method, model, max_pop, and top_k in the file name to avoid overwriting."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    output_file = os.path.join(output_dir, f"evaluation_results_{timestamp}.txt")
+    output_file = os.path.join(output_dir, f"evaluation_results_{method}_{model}_maxpop{max_pop}_topk{top_k}_{timestamp}.csv")
     return output_file
 
 
-def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file):
+def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file, metric):
     """
     Evaluate the answers and save the results in the specified file.
     """
@@ -33,12 +32,12 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
     total_f1 = 0
     num_samples = len(df)
 
-    # Write headers
-    write_results(output_file, [f"Method: {method}, Model: {model}, max_pop: {max_pop}, top_k: {top_k}\n"])
-    write_results(output_file, [f"Test Dataset: {df['query_en'].name}\n"])
-    write_results(output_file, ["Average Precision: 0.0000"])
-    write_results(output_file, ["Average Recall: 0.0000"])
-    write_results(output_file, ["Average F1: 0.0000"])
+    # Initialize list to store the results for CSV
+    results = []
+
+    # Write headers (only for the first write)
+    headers = ['Question', 'Answer', 'Ref', 'P', 'R', 'F1', 'Time']
+    write_results_to_csv(output_file, [headers])
 
     # Process each sample
     for i in range(num_samples):
@@ -58,10 +57,15 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
 
         print(f"final_answer:\n{final_answer}")
 
-        # Compute BERTScore
+
         cand = [final_answer]
-        P, R, F1 = score(cand, ref, lang="en", verbose=True, model_type='bert-large-uncased',
-                         rescale_with_baseline=True, device='cuda')
+
+        # 判断要使用哪种指标
+        if metric == "BERTScore":
+            bertScore_model_path = "evaluation_metrics/bert-large-uncased"
+            # Compute BERTScore
+            P, R, F1 = score(cand, ref, lang="en", verbose=True, model_type=bertScore_model_path,
+                             rescale_with_baseline=True, device='cuda')
 
         print(f"Precision: {P.mean():.4f}")
         print(f"Recall: {R.mean():.4f}")
@@ -74,16 +78,18 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
         time1 = time.time()
         print(f"用时:{time1 - time0}")
 
-        # Write per-sample results
-        result = (f"Question: {question}\n"
-                  f"Answer: {final_answer}\n"
-                  f"Cand: {cand}\n"
-                  f"Ref: {ref}\n"
-                  f"P: {P.mean():.4f}, R: {R.mean():.4f}, F1: {F1.mean():.4f}\n"
-                  f"Time: {time1 - time0}\n")
-        write_results(output_file, [result])
+        # Store per-sample results for CSV (removed 'Cand' field)
+        results.append({
+            'Question': question,
+            'Answer': final_answer,
+            'Ref': str(ref),
+            'P': f"{P.mean():.4f}",
+            'R': f"{R.mean():.4f}",
+            'F1': f"{F1.mean():.4f}",
+            'Time': f"{time1 - time0:.4f}"
+        })
 
-    # Calculate and write average P, R, F1
+    # Calculate average scores
     avg_p = total_p / num_samples
     avg_r = total_r / num_samples
     avg_f1 = total_f1 / num_samples
@@ -92,17 +98,18 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
     print(f"Average Recall: {avg_r:.4f}")
     print(f"Average F1: {avg_f1:.4f}")
 
-    # Update file with average scores
-    with open(output_file, "r") as f:
-        lines = f.readlines()
+    # Append average scores to results and write them to the CSV
+    results.append({
+        'Question': 'Average',
+        'Answer': '',
+        'Ref': '',
+        'P': f"{avg_p:.4f}",
+        'R': f"{avg_r:.4f}",
+        'F1': f"{avg_f1:.4f}",
+        'Time': ''
+    })
 
-    # Insert average scores at the beginning
-    lines[2] = f"Average Precision: {avg_p:.4f}\n"
-    lines[3] = f"Average Recall: {avg_r:.4f}\n"
-    lines[4] = f"Average F1: {avg_f1:.4f}\n"
-
-    with open(output_file, "w") as f:
-        f.writelines(lines)
+    write_results_to_csv(output_file, results)
 
     print("Evaluation completed and results saved.")
 
@@ -121,9 +128,11 @@ if __name__ == "__main__":
     output_dir = "./output"
     test_dataset = "./data/IFLYTEC-NLP/test200/200_QA_多文档.csv"
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    metric = "BERTScore"
+
 
     label_dict = back.build_label_dict(schema_text_path)
     df = pd.read_csv(test_dataset)
-    output_file = create_output_file(output_dir, timestamp)
+    output_file = create_output_file(output_dir, method, model, max_pop, top_k, timestamp)
 
-    evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file)
+    evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file, metric)
