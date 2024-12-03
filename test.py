@@ -119,7 +119,7 @@ if __name__ == "__main__":
     password = "12345678"  # 密码
     driver = GraphDatabase.driver(uri, auth=(user, password))  # 创建数据库连接
 
-    method = "BackTrack"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则
+    method = "RuleBase"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则
     max_pop = 5  # 构建推理树时最大的推理跳数
     top_k = 5  # 如果一个实体满足next_label的邻居有多个，最多取top_k个
     model = "gpt-4o-mini"  # 选择生成最终答案使用的模型。包括：spark, gpt-4o-mini（提取条件和目的就使用spark，因为便宜，而且效果也还不错）

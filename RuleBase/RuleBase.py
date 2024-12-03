@@ -48,7 +48,7 @@ def rule_base(question, max_pop, label_dict, driver, model, top_k):
         print("没有匹配到实体")
 
     # 5. 调用大模型生成最终答案
-    print("======5. 调用大模型生成最终答案======")
+    print("\n======5. 调用大模型生成最终答案======")
     generation = answer.generate_answer(question, reference, model)
 
     return generation
