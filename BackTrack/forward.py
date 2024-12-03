@@ -168,27 +168,32 @@ def rules_forward(rules, conditions, driver, top_k):
     forward_root = Node("forward_root") # 因为每一个节点的邻居中满足next_label条件的可能有多个，用树的形式来组织更好。
 
     for path in rules:
-        condition_entity = ''
+        condition_entities = []  # 有可能条件中有多个相同label的实体
 
         for condition in conditions:
             if path[0] == condition[1]:
-                condition_entity = condition[0] # 这一条推理路径的条件实体名
-                break
+                condition_entities.append(condition[0])  # 这一条推理路径的条件实体名
                 # todo: 如果找不到呢
 
         # 先把起始节点加入到结果中
-        if condition_entity != '':
-            condition_node = Node(condition_entity, parent=forward_root, label=path[0])
-
-        # Cypher查询
-        i = 0
-        neo4j_match(condition_node, driver, i, path, conditions, top_k)
+        if len(condition_entities) != 0:
+            for condition_entity in condition_entities:
+                condition_node = Node(condition_entity, parent=forward_root, label=path[0])
+                # Cypher查询
+                i = 0
+                neo4j_match(condition_node, driver, i, path, conditions, top_k)
 
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 
-    paths = dfs_paths(forward_root)  # 深度优先搜索所有路径
-    merged = merge_paths(paths)  # 按条件合并路径
-    result_str = display_merged_results(merged)  # 汇总合并过滤后的结果为一个字符串
+    all_paths = dfs_paths(forward_root)  # 深度优先搜索所有路径
+    merged = merge_paths(all_paths)  # 按条件合并路径
+
+    aims = []
+    for rule in rules:
+        aims.append(['', rule[-1]])
+
+    filtered_merged = filter_results_by_aims(merged, aims)  # 从输出中筛选出 last Label 符合 aims 的路径
+    result_str = display_merged_results(filtered_merged)  # 汇总合并过滤后的结果为一个字符串
 
     return result_str
         

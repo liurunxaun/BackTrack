@@ -16,8 +16,6 @@ def select_rules(paths, question):
 
     rules = []
 
-    print(f"paths_waited:{paths}")
-
     query = f"""
         请根据用户提供的问题和给定的推理路径，筛选出与问题相关的推理路径。对于每个路径，只需要提取出相关部分，路径中不相关的部分可以省略。
 
@@ -57,6 +55,8 @@ def select_rules(paths, question):
     """
 
     response = llm.spark_4_0(query_English)
+    
+    print(f"response:\n{response}")
 
     pattern = r"\['(.*?)'\]"  # 匹配类似 ['领域', '标题', '方法'] 的结构
     matches = re.findall(pattern, response)

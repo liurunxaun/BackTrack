@@ -48,8 +48,11 @@ def generate_answer(question, reference="", model = "spark"):
     """
 
     if model == "spark":
+        print(f"query:\n{query}")
         return spark.spark_4_0(query)
     elif model == "gpt-4o-mini":
+        print(f"system_content:\n{system_content}")
+        print(f"user_content:\n{user_content}")
         return openai.gpt_4o_mini(system_content, user_content)
     else:
         return "没有这个模型。现在可选的模型有: spark, gpt-4o-mini"

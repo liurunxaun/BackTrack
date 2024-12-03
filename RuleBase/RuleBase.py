@@ -36,7 +36,7 @@ def rule_base(question, max_pop, label_dict, driver, model, top_k):
     # 3. 筛选对回答问题有帮助的问题
     print("\n======3. 大模型筛选对回答问题有帮助的问题======")
     rules = select.select_rules(paths, question)
-    print(rules)
+    print(f"rules:\n{rules}")
 
     # 4. 正推生成实体路径
     print("\n======4. 正推生成实体路径======")
