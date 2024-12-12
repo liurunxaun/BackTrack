@@ -34,7 +34,7 @@ def rule_base(question, max_pop, label_dict, driver, model, top_k):
         return generation
 
     # 3. 筛选对回答问题有帮助的问题
-    print("\n======3. 大模型筛选对回答问题有帮助的问题======")
+    print("\n======3. 大模型筛选对回答问题有帮助的路径======")
     rules = select.select_rules(paths, question)
     print(f"rules:\n{rules}")
 

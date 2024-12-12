@@ -6,6 +6,7 @@ import pandas as pd
 from bert_score import score
 import os
 from datetime import datetime
+import pickle
 
 
 def write_results_to_csv(output_file, data):
@@ -113,13 +114,25 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
     print("Evaluation completed and results saved.")
 
 
+def load_kg_entity_embeddings(embedding_file_path):
+    print("\n提前加载实体嵌入")
+    # 读取知识图谱中实体的embedding
+    with open(embedding_file_path, 'rb') as f1:
+        entity_embeddings = pickle.load(f1)
+    entity_embeddings_emb = pd.DataFrame(entity_embeddings["embeddings"])
+    print(f"加载完毕，共有{len(entity_embeddings_emb)}")
+    # 从加载的数据中提取向量化器
+    vectorizer = entity_embeddings["vectorizer"]
+    return entity_embeddings, vectorizer
+
+
 if __name__ == "__main__":
     uri = "bolt://10.43.108.62:7687"  # Neo4j连接URI
     user = "neo4j"  # 用户名
     password = "12345678"  # 密码
     driver = GraphDatabase.driver(uri, auth=(user, password))  # 创建数据库连接
 
-    method = "RuleBase"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则
+    method = "BackTrack"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则
     max_pop = 5  # 构建推理树时最大的推理跳数
     top_k = 5  # 如果一个实体满足next_label的邻居有多个，最多取top_k个
     model = "gpt-4o-mini"  # 选择生成最终答案使用的模型。包括：spark, gpt-4o-mini（提取条件和目的就使用spark，因为便宜，而且效果也还不错）
@@ -128,9 +141,11 @@ if __name__ == "__main__":
     output_dir = "./output"  # 测试结果的存储路径，存储为csv文件，会根据上面的参数和当前时间命名
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")  # 指定输出文件名中的时间戳
     metric = "BERTScore"  # 选择实验的指标，包括：BERTScore
+    embedding_file_path = "./data/IFLYTEC-NLP/GraphKnowledge/entity_embeddings_tfidf.pkl"
 
     label_dict = back.build_label_dict(schema_text_path)
     df = pd.read_csv(test_dataset)
     output_file = create_output_file(output_dir, method, model, max_pop, top_k, timestamp)
+    # entity_embeddings, vectorizer = load_kg_entity_embeddings(embedding_file_path)
 
     evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file, metric)
