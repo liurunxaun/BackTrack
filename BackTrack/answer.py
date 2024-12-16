@@ -21,7 +21,7 @@ def generate_answer(question, reference="", model = "spark"):
     {reference}
 
     请严格依据参考内容回答问题，并进行必要的逻辑推理，生成最终答案。
-    **注意**：生成的答案中不得提及或透露参考内容的存在。
+    **注意**：生成的答案中不得提及或透露参考内容的存在。请用英文回答。
     """
 
     # System role content
