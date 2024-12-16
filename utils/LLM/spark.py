@@ -6,9 +6,9 @@ import json
 # 星火认知大模型的配置
 SPARKAI_URL_4_0 = 'wss://spark-api.xf-yun.com/v4.0/chat'
 
-SPARKAI_APP_ID = '4f6b5020'
-SPARKAI_API_SECRET = 'MGI3MGQ5MjJhMjAzMWY2ODFkNDMxYjI1'
-SPARKAI_API_KEY = 'f299adff306173af4588cdd14dca6788'
+SPARKAI_APP_ID = '06023e43'
+SPARKAI_API_SECRET = 'OTE2ODNhMjY1YmZhZjZlYjRlM2FiZGI0'
+SPARKAI_API_KEY = '7691129081cbdafccffe856aac0af6fd'
 SPARKAI_DOMAIN_4_0 = '4.0Ultra'
 
 spark4_0 = ChatSparkLLM(

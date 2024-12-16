@@ -33,7 +33,8 @@ def back_track(question, max_pop, label_dict, driver, model, top_k):
         print("没找到抽象本体推理路径。请尝试换个说法，或者描述的更详细一些")
         print("\n======3. 调用大模型生成最终答案======")
         generation = answer.generate_answer(question)
-        return generation
+        success_excute_flag = 0
+        return generation, success_excute_flag
 
 
     # 3. 正推找具体实体推理路径，筛选得到条件和目的实体
@@ -44,9 +45,14 @@ def back_track(question, max_pop, label_dict, driver, model, top_k):
         print(reference)
     else:
         print("没有匹配到实体")
+        print("\n======4. 调用大模型生成最终答案======")
+        generation = answer.generate_answer(question, reference, model)
+        success_excute_flag = 0
+        return generation, success_excute_flag
 
 
     # 4. 调用大模型生成最终答案
     print("\n======4. 调用大模型生成最终答案======")
     generation = answer.generate_answer(question, reference, model)
-    return generation
+    success_excute_flag = 1
+    return generation, success_excute_flag
