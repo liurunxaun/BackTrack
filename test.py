@@ -8,11 +8,6 @@ import os
 from datetime import datetime
 
 
-def write_results_to_csv(output_file, data):
-    """Write the results to a CSV file."""
-    df = pd.DataFrame(data)
-    df.to_csv(output_file, mode='a', header=not os.path.exists(output_file), index=False)
-
 def create_output_file(output_dir, method, model, max_pop, top_k, timestamp):
     """Create an output file with method, model, max_pop, and top_k in the file name to avoid overwriting."""
     if not os.path.exists(output_dir):
@@ -20,6 +15,13 @@ def create_output_file(output_dir, method, model, max_pop, top_k, timestamp):
 
     output_file = os.path.join(output_dir, f"evaluation_results_{method}_{model}_maxpop{max_pop}_topk{top_k}_{timestamp}.csv")
     return output_file
+
+
+def write_results_to_csv(output_file, data):
+    """Write the results to a CSV file."""
+    df = pd.DataFrame(data)
+    df.to_csv(output_file, mode='a', header=False, index=False)  # 始终禁用表头和行索引写入
+
 
 def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file, metric, questions, reference_answers):
     """
@@ -32,15 +34,15 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
 
     # Write headers to the file (only once at the start)
     if not os.path.exists(output_file):
-        headers = ['Question', 'Answer', 'Ref', 'P', 'R', 'F1', 'Time', 'SuccessFlag', 'Error']
-        write_results_to_csv(output_file, [headers])
+        df_empty = pd.DataFrame(columns=['Question', 'Answer', 'Ref', 'P', 'R', 'F1', 'Time', 'SuccessFlag', 'Error'])
+        df_empty.to_csv(output_file, mode='w', index=False)
 
     # Process each sample
     for i in range(num_samples):
         question = questions[i]  # 用户输入的问题
         ref = [reference_answers[i]]
 
-        print(f"\nProcessing question {i + 1}/{num_samples}: {question}")
+        print(f"\n$$$$$$ Processing question {i + 1}/{num_samples}: $$$$$$")
         
         time0 = time.time()
         try:
