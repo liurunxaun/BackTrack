@@ -16,7 +16,7 @@ def rule_base(question, max_pop, label_dict, driver, model, top_k):
     else:
         print("问题中不包含知识图谱范围内的条件")
         print("\n======2. 调用大模型生成最终答案======")
-        generation = answer.generate_answer(question)
+        generation = answer.generate_answer(question, "", model)
         success_excute_flag = 0
         return generation, success_excute_flag
 
@@ -31,7 +31,7 @@ def rule_base(question, max_pop, label_dict, driver, model, top_k):
     else:
         print("没找到抽象本体推理路径。请尝试换个说法，或者描述的更详细一些")
         print("\n======3. 调用大模型生成最终答案======")
-        generation = answer.generate_answer(question)
+        generation = answer.generate_answer(question, "", model)
         success_excute_flag = 0
         return generation, success_excute_flag
 

@@ -1,4 +1,4 @@
-from BackTrack import back, BackTrack
+from BackTrack import back, BackTrack, answer
 from RuleBase import RuleBase
 from neo4j import GraphDatabase
 import time
@@ -51,7 +51,9 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
                 final_answer, success_excute_flag = BackTrack.back_track(question, max_pop, label_dict, driver, model, top_k)
             elif method == "RuleBase":
                 final_answer, success_excute_flag = RuleBase.rule_base(question, max_pop, label_dict, driver, model, top_k)
-
+            elif method == "Spark":
+                final_answer = answer.generate_answer(question, "","spark")
+                success_excute_flag = 0
             print(f"Final answer: \n{final_answer}")
 
             cand = [final_answer]
@@ -129,7 +131,7 @@ if __name__ == "__main__":
     password = "12345678"  # 密码
     driver = GraphDatabase.driver(uri, auth=(user, password))  # 创建数据库连接
 
-    method = "BackTrack"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则
+    method = "Spark"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则，"Spark"直接使用spark
     max_pop = 5  # 构建推理树时最大的推理跳数
     top_k = 5  # 如果一个实体满足next_label的邻居有多个，最多取top_k个
     model = "spark"  # 选择生成最终答案使用的模型。包括：spark, gpt-4o-mini（提取条件和目的就使用spark，因为便宜，而且效果也还不错）
