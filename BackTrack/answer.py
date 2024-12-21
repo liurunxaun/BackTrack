@@ -9,28 +9,28 @@ def generate_answer(question, reference="", model = "spark"):
     """
 
     query = f"""
-    我正在进行一个知识问答任务。
-    用户输入了以下问题：
-    "{question}"
-    
-    我可以提供给你一些参考内容，每组内容包括两部分：条件和目的。
-    - 条件：问题中的已知信息。
-    - 目的：问题中想要解答的目标。
+        I am working on a knowledge-based question-answering task.
+        The user has input the following question:
+        "{question}"
 
-    以下是参考内容：
-    {reference}
+        I can provide you with some reference content, where each set of content consists of two parts: conditions and objectives.
+        - Conditions: The known information from the question.
+        - Objectives: The goals that the question seeks to address.
 
-    请严格依据参考内容回答问题，并进行必要的逻辑推理，生成最终答案。
-    **注意**：生成的答案中不得提及或透露参考内容的存在。请用英文回答。
+        Below is the reference content:
+        {reference}
+
+        Please strictly follow the reference content to answer the question, applying logical reasoning as needed to generate the final answer.
+        **Note**: The generated answer must not mention or disclose the existence of the reference content.
     """
 
-    # System role content
+    # OpenAI System role content
     system_content = """
     You are a helpful and knowledgeable assistant. Your task is to provide precise answers by performing logical reasoning based on the user's input and additional reference content. 
     Remember: You must not disclose or mention the existence of the reference content provided to you in your response.
     """
 
-    # User role content
+    # OpenAI User role content
     user_content = f"""
     I am working on a knowledge-based question-answering task. 
     The user has input the following question:

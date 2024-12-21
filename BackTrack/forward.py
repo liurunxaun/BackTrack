@@ -56,10 +56,10 @@ def display_merged_results(merged):
     """汇总合并过滤后的结果为一个字符串并返回。"""
     result_str = ""
     for first_key, last_groups in merged.items():
-        result_str += f"条件: {first_key}\n"
+        result_str += f"Conditions: {first_key}\n"
         for last_label, last_nodes in last_groups.items():
             node_names = ", ".join(last_node.name for last_node in last_nodes)
-            result_str += f"  目的: {last_label}\n"
+            result_str += f"  Aims: {last_label}\n"
             result_str += f"    Nodes: [{node_names}]\n"
     return result_str
 
