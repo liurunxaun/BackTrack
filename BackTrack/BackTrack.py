@@ -4,12 +4,12 @@ from BackTrack import forward as forward
 from BackTrack import answer as answer
 
 
-def back_track(question, max_pop, label_dict, driver, model, top_k):
+def back_track(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, model, top_k):
     print(f"\n问题:{question}")
 
     # 1. 从问题中提取条件实体、目的实体、实体类型
     print("\n======1. 从问题中提取条件实体、目的实体、实体类型======")
-    conditions, aims = extract.extract(question)
+    conditions, aims = extract.extract(question, label_description_path, entity_extract_example_path)
 
     if len(conditions) != 0 and len(aims) != 0:
         print(f"conditions:{conditions}")
@@ -39,7 +39,7 @@ def back_track(question, max_pop, label_dict, driver, model, top_k):
 
     # 3. 正推找具体实体推理路径，筛选得到条件和目的实体
     print("\n======3. 正推具体实体推理路径，筛选得到条件和目的实体======")
-    reference = forward.forward(paths, conditions, driver, aims, top_k)
+    reference = forward.forward(paths, conditions, driver, neo4j_database_name, aims, top_k)
 
     if reference != "":
         print(reference)

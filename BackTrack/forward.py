@@ -64,7 +64,7 @@ def display_merged_results(merged):
     return result_str
 
 
-def neo4j_match(source_node, driver, i, path, conditions, top_k):
+def neo4j_match(source_node, driver, neo4j_database_name, i, path, conditions, top_k):
     i = i + 1
     if i >= len(path):
         return
@@ -77,11 +77,11 @@ def neo4j_match(source_node, driver, i, path, conditions, top_k):
 
 
     # 执行查询
-    with driver.session() as session:
+    with driver.session(database = neo4j_database_name) as session:
         result = session.run(
             """
             MATCH (n)-[r]-(m)
-            WHERE n.name = $source_name AND m.label = $end_label
+            WHERE n.name = $source_name AND $end_label IN labels(m)
             RETURN collect(m.name) AS neighbors, type(r) AS relation
             """,
             source_name=source_name,
@@ -111,14 +111,14 @@ def neo4j_match(source_node, driver, i, path, conditions, top_k):
                 n = Node(neighbor, parent=source_node, label=path[i], parent_edge=relation)
 
             for child in source_node.children:
-                neo4j_match(child, driver, i, path, conditions, top_k)
+                neo4j_match(child, driver, neo4j_database_name, i, path, conditions, top_k)
 
         else:
             # todo: 采用其他方式
             return
 
 
-def forward(paths, conditions, driver, aims, top_k):
+def forward(paths, conditions, driver, neo4j_database_name, aims, top_k):
     """
     输入：1.倒推得到的路径path[] 2.条件[]
     处理过程：
@@ -149,7 +149,7 @@ def forward(paths, conditions, driver, aims, top_k):
                 condition_node = Node(condition_entity, parent=forward_root, label=path[0])
                 # Cypher查询
                 i = 0
-                neo4j_match(condition_node, driver, i, path, conditions, top_k)
+                neo4j_match(condition_node, driver, neo4j_database_name, i, path, conditions, top_k)
 
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 
@@ -161,7 +161,7 @@ def forward(paths, conditions, driver, aims, top_k):
     return result_str
 
 
-def rules_forward(rules, conditions, driver, top_k):
+def rules_forward(rules, conditions, driver, neo4j_database_name, top_k):
 
     result_str = ""
 
@@ -181,7 +181,7 @@ def rules_forward(rules, conditions, driver, top_k):
                 condition_node = Node(condition_entity, parent=forward_root, label=path[0])
                 # Cypher查询
                 i = 0
-                neo4j_match(condition_node, driver, i, path, conditions, top_k)
+                neo4j_match(condition_node, driver, neo4j_database_name, i, path, conditions, top_k)
 
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 

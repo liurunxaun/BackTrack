@@ -23,7 +23,7 @@ def write_results_to_csv(output_file, data):
     df.to_csv(output_file, mode='a', header=False, index=False)  # 始终禁用表头和行索引写入
 
 
-def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file, metric, questions, reference_answers):
+def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, output_file, metric, questions, reference_answers):
     """
     Evaluate the answers and save the results in the specified file.
     """
@@ -48,9 +48,9 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, dri
         try:
             # Call BackTrack or RuleBase based on the method
             if method == "BackTrack":
-                final_answer, success_excute_flag = BackTrack.back_track(question, max_pop, label_dict, driver, model, top_k)
+                final_answer, success_excute_flag = BackTrack.back_track(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, model, top_k)
             elif method == "RuleBase":
-                final_answer, success_excute_flag = RuleBase.rule_base(question, max_pop, label_dict, driver, model, top_k)
+                final_answer, success_excute_flag = RuleBase.rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, model, top_k)
             elif method == "Spark":
                 final_answer = answer.generate_answer(question, "","spark")
                 success_excute_flag = 0
@@ -130,23 +130,26 @@ if __name__ == "__main__":
     user = "neo4j"  # 用户名
     password = "12345678"  # 密码
     driver = GraphDatabase.driver(uri, auth=(user, password))  # 创建数据库连接
-
-    method = "Spark"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则，"Spark"直接使用spark
-    max_pop = 5  # 构建推理树时最大的推理跳数
-    top_k = 5  # 如果一个实体满足next_label的邻居有多个，最多取top_k个
-    model = "spark"  # 选择生成最终答案使用的模型。包括：spark, gpt-4o-mini（提取条件和目的就使用spark，因为便宜，而且效果也还不错）
-    schema_text_path = "./data/IFLYTEC-NLP/GraphKnowledge/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label:entity_name-relation-label:entity_name
-    test_dataset = "./data/IFLYTEC-NLP/test200/200_QA_多文档.csv"  # 要进行测试的数据集路径，注意是csv格式的
     output_dir = "./output"  # 测试结果的存储路径，存储为csv文件，会根据上面的参数和当前时间命名
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")  # 指定输出文件名中的时间戳
-    metric = "BERTScore"  # 选择实验的指标，包括：BERTScore
-    # embedding_file_path = "./data/IFLYTEC-NLP/GraphKnowledge/entity_embeddings_tfidf.pkl"
 
+    # 算法可供选择的参数
+    method = "BackTrack"  # 选择要使用的方法，包括"BackTrack"倒推，"RuleBase"基于规则，"Spark"直接使用spark
+    max_pop = 5  # 构建推理树时最大的推理跳数
+    top_k = 5  # 如果一个实体满足next_label的邻居有多个，最多取top_k个
+    generate_answer_model = "spark"  # 选择生成最终答案使用的模型。包括：spark, gpt-4o-mini（提取条件和目的就使用spark，因为便宜，而且效果也还不错）
+
+    # 使用不同数据集需要修改的参数
+    test_dataset = "./data/IFLYTEC-NLP/test200/200_QA_多文档.csv"  # 要进行测试的数据集路径，注意是csv格式的
+    schema_text_path = "./data/IFLYTEC-NLP/GraphKnowledge/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label:entity_name-relation-label:entity_name
     label_dict = back.build_label_dict(schema_text_path)
+    label_description_path = "./data/IFLYTEC-NLP/GraphKnowledge/label_description.txt"
+    entity_extract_example_path = "./data/IFLYTEC-NLP/GraphKnowledge/entity_extract_example.txt"
+    neo4j_database_name = "neo4j"
     df = pd.read_csv(test_dataset)
     questions = df["query_en"]
     reference_answers = df["answer_en"]
-    output_file = create_output_file(output_dir, method, model, max_pop, top_k, timestamp)
-    # entity_embeddings, vectorizer = load_kg_entity_embeddings(embedding_file_path)
 
-    evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, driver, output_file, metric, questions, reference_answers)
+    metric = "BERTScore"  # 选择实验的指标，包括：BERTScore
+    output_file = create_output_file(output_dir, method, generate_answer_model, max_pop, top_k, timestamp)
+    evaluate_and_save_results(df, method, max_pop, top_k, generate_answer_model, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, output_file, metric, questions, reference_answers)

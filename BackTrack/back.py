@@ -19,8 +19,8 @@ def build_label_dict(txt_file):
                 continue  # 如果格式不对，跳过该行
 
             # 提取实体，去除label前缀
-            label1 = parts[0].split(':')[0]  # 获取实体1，去除label前缀
-            label2 = parts[2].split(':')[0]  # 获取实体2，去除label前缀
+            label1 = parts[0]
+            label2 = parts[2]
 
             # 将实体添加到字典
             if label1 not in label_dict:

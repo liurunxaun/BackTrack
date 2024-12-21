@@ -4,12 +4,12 @@ from BackTrack import forward
 from RuleBase import collect
 from RuleBase import select
 
-def rule_base(question, max_pop, label_dict, driver, model, top_k):
+def rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, model, top_k):
     print(f"\n问题:{question}")
 
     # 1. 从问题中提取条件实体、目的实体、实体类型
     print("\n======1. 从问题中提取条件实体和实体类型======")
-    conditions, aims = extract.extract(question)
+    conditions, aims = extract.extract(question, label_description_path, entity_extract_example_path)
 
     if len(conditions) != 0:
         print(f"conditions:{conditions}")
@@ -42,7 +42,7 @@ def rule_base(question, max_pop, label_dict, driver, model, top_k):
 
     # 4. 正推生成实体路径
     print("\n======4. 正推生成实体路径======")
-    reference = forward.rules_forward(rules, conditions, driver, top_k)
+    reference = forward.rules_forward(rules, conditions, driver, neo4j_database_name, top_k)
 
     if reference != "":
         print(reference)
