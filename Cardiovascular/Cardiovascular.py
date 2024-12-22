@@ -3,11 +3,12 @@ import json
 from flask import Flask, request
 from neo4j import GraphDatabase
 
-from BackTrack import BackTrack
 from BackTrack import answer as answer
 from BackTrack import back as back
 from BackTrack import extract as extract
 from BackTrack import forward as forward
+from RuleBase import collect
+from RuleBase import select
 
 app = Flask(__name__)
 
@@ -58,8 +59,8 @@ def main():
         return json_pack([generation, "", "", []])
 
     # 2. 倒推找抽象本体推理路径
-    print("\n======2.倒推找抽象本体推理路径======")
-    paths = back.aim_back(conditions, aims, max_pop, label_dict)
+    print("\n======2. 从条件出发收集全部路径======")
+    paths = collect.collect_paths(conditions, max_pop, label_dict)
 
     if len(paths) != 0:
         path_string = ""
@@ -72,20 +73,25 @@ def main():
         generation = answer.generate_answer(question, "", model)
         return json_pack([generation,"","",[]])
 
-    # 3. 正推找具体实体推理路径，筛选得到条件和目的实体
-    print("\n======3. 正推具体实体推理路径，筛选得到条件和目的实体======")
-    reference = forward.forward(paths, conditions, driver, neo4j_database_name, aims, top_k)
+    # 3. 筛选对回答问题有帮助的问题
+    print("\n======3. 大模型筛选对回答问题有帮助的路径======")
+    rules = select.select_rules(paths, question)
+    print(f"rules:\n{rules}")
+
+    # 4. 正推生成实体路径
+    print("\n======4. 正推生成实体路径======")
+    reference = forward.rules_forward(rules, conditions, driver, neo4j_database_name, top_k)
 
     if reference != "":
         print(reference)
     else:
         print("没有匹配到实体")
-        print("\n======4. 调用大模型生成最终答案======")
+        print("\n======5. 调用大模型生成最终答案======")
         generation = answer.generate_answer(question, reference, model)
         return json_pack([generation, path_string, "",[]])
 
     # 4. 调用大模型生成最终答案
-    print("\n======4. 调用大模型生成最终答案======")
+    print("\n======5. 调用大模型生成最终答案======")
     generation = answer.generate_answer(question, reference, model)
     return json_pack([generation, path_string, reference, []])
 
