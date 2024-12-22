@@ -2,6 +2,8 @@ from sparkai.llm.llm import ChatSparkLLM
 from websocket import create_connection
 import time
 import json
+from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
+from sparkai.core.messages import ChatMessage
 
 # 星火认知大模型的配置
 SPARKAI_URL_4_0 = 'wss://spark-api.xf-yun.com/v4.0/chat'
@@ -21,7 +23,17 @@ spark4_0 = ChatSparkLLM(
 )
 
 
-def spark_4_0(query, ip_port='10.43.108.62:8678'):
+def spark_4_0(query):
+    messages = [ChatMessage(
+        role="user",
+        content=query
+    )]
+    handler = ChunkPrintHandler()
+    response = spark4_0.generate([messages], callbacks=[handler])
+    return response.generations[0][0].text
+
+
+def spark_4_0_company(query, ip_port='10.43.108.62:8678'):
     """
     封装的函数，用于通过 WebSocket 查询信息，并统计首字符的响应时间
 
