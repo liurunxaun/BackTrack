@@ -30,7 +30,7 @@ def main():
     question = data.get('question')
     print('\nQuestion:', question)
 
-    uri = "bolt://10.43.108.62:7687"  # Neo4j连接URI
+    uri = "bolt://localhost:7687"  # Neo4j连接URI
     user = "neo4j"  # 用户名
     password = "12345678"  # 密码
     driver = GraphDatabase.driver(uri, auth=(user, password))  # 创建数据库连接
@@ -63,10 +63,7 @@ def main():
     paths = collect.collect_paths(conditions, max_pop, label_dict)
 
     if len(paths) != 0:
-        path_string = ""
-        for path in paths:
-            path_string += " -> ".join(path) + "\n"
-        print(path_string)
+        print(paths)
     else:
         print("没找到抽象本体推理路径。请尝试换个说法，或者描述的更详细一些")
         print("\n======3. 调用大模型生成最终答案======")
@@ -76,7 +73,12 @@ def main():
     # 3. 筛选对回答问题有帮助的问题
     print("\n======3. 大模型筛选对回答问题有帮助的路径======")
     rules = select.select_rules(paths, question)
-    print(f"rules:\n{rules}")
+
+    if len(rules) != 0:
+        rules_string = ""
+        for rule in rules:
+            rules_string += " -> ".join(rule) + "\n"
+        print(f"rules:\n{rules_string}")
 
     # 4. 正推生成实体路径
     print("\n======4. 正推生成实体路径======")
@@ -88,12 +90,12 @@ def main():
         print("没有匹配到实体")
         print("\n======5. 调用大模型生成最终答案======")
         generation = answer.generate_answer(question, reference, model)
-        return json_pack([generation, path_string, "",[]])
+        return json_pack([generation, rules_string, "",[]])
 
     # 4. 调用大模型生成最终答案
     print("\n======5. 调用大模型生成最终答案======")
     generation = answer.generate_answer(question, reference, model)
-    return json_pack([generation, path_string, reference, []])
+    return json_pack([generation, rules_string, reference, []])
 
 
 if __name__ == "__main__":
