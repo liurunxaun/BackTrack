@@ -78,15 +78,28 @@ def neo4j_match(source_node, driver, neo4j_database_name, i, path, conditions, t
 
     # 执行查询
     with driver.session(database = neo4j_database_name) as session:
-        result = session.run(
-            """
-            MATCH (n)-[r]-(m)
-            WHERE n.name = $source_name AND $end_label IN labels(m)
-            RETURN collect(m.name) AS neighbors, type(r) AS relation
-            """,
-            source_name=source_name,
-            end_label=end_label
-        )
+        # 由于iflytec_nlp的label是属性，所以分开
+        if neo4j_database_name == "neo4j": # ifytec_nlp在neo4j数据库使用的是默认数据库名称neo4j
+            result = session.run(
+                """
+                MATCH (n)-[r]-(m)
+                WHERE n.name = $source_name AND m.label = $end_label
+                RETURN collect(m.name) AS neighbors, type(r) AS relation
+                """,
+                source_name=source_name,
+                end_label=end_label
+            )
+
+        elif neo4j_database_name == "cardiovascularMini":
+            result = session.run(
+                """
+                MATCH (n)-[r]-(m)
+                WHERE n.name = $source_name AND $end_label IN labels(m)
+                RETURN collect(m.name) AS neighbors, type(r) AS relation
+                """,
+                source_name=source_name,
+                end_label=end_label
+            )
 
         neighbor_list = []
         relation = ''

@@ -1,0 +1,7 @@
+-Disease(疾病名称或者并发疾病名称)
+-Department(医院科室)
+-Drug(药品名称)
+-Food(食物名称)
+-Cure_way(治疗方案)
+-Symptom(症状描述)
+-Check(需要做的检查)

@@ -1,0 +1,8 @@
+Disease-belongs_to-Department
+Disease-common_drug-Drug
+Disease-acompany_with-Disease
+Disease-do_eat-Food
+Disease-no_eat-Food
+Disease-cure-Cure_way
+Disease-has_symptom-Symptom
+Disease-need_check-Check

@@ -1,0 +1,19 @@
+示例1:
+输入: Kausalgie发表过多少篇论文？
+输出: Kausalgie,作者.papers,标题
+
+示例2:
+输入: machine translation领域有哪些数据集？
+输出: machine translation,领域.dataset,数据集
+
+示例3:
+输入: SpellGCN的作者是谁？
+输出: SpellGCN,标题.author,作者
+
+示例4:
+输入: MindMap和KAG哪个更早？作者分别是谁？
+输出: MindMap,方法;KAG,方法.earlier,none;author,作者
+
+示例5:
+输入: In the field of machine translation, what are the ways to obtain and generate appropriate data sets for low-resource situations?
+输出: machine translation,领域;low-resource situations,问题;obtain and generate appropriate data sets,问题.ways,方法

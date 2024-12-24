@@ -1,0 +1,27 @@
+作者-writes-标题
+作者-works for-机构
+标题-belongs to-领域
+会议-publishes-标题
+标题-keyword-关键词
+标题-(paper)solves-问题
+标题-(paper)adopts-方法
+标题-(paper)proposes-模型
+标题-(paper)works on-任务
+标题-(paper)innovates-创新点 point
+任务-(task)experiments on-数据集
+任务-(task)uses-指标
+任务-faces-问题
+方法-(method)innovates-创新点 point
+方法-(method)proposes-模型
+方法-(method)works on-任务
+方法-(method)solves-问题
+方法-(method)has-结果
+标题-(paper)experiments on-数据集
+标题-(paper)uses-指标
+标题-(paper)has-结果
+模型-(model)uses-数据集
+模型-(model)uses-指标
+模型-(model)has-结果
+模型-(model)works on-任务
+模型-(model)solves-问题
+标题-ID-id
