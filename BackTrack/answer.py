@@ -1,7 +1,7 @@
 from utils.LLM import openai, spark
 
 
-def generate_answer(question, reference="", model = "spark"):
+def generate_answer(question, last_node_str = "", reasoning_path_str = "", model = "spark"):
     """
     输入：用户的问题，推理出的意图和目的实体
     处理过程：完善query，交给大模型
@@ -16,9 +16,16 @@ def generate_answer(question, reference="", model = "spark"):
         I can provide you with some reference content, where each set of content consists of two parts: conditions and objectives.
         - Conditions: The known information from the question.
         - Objectives: The goals that the question seeks to address.
-
-        Below is the reference content:
-        {reference}
+        Below is the conditions and objectives:
+        {last_node_str}
+        
+        I can also provide you the complete reasoning paths which maybe useful for you. I wish you cloud utilize your reasoning ability to answer users' question
+        - Each path is described by nodes and edges in the following format: [Entity Type] Entity Name -> (Relation) [Entity Type] Entity Name -> ...
+        - Each node includes [Entity Type] Entity Name.
+        - Each edge is represented by an arrow ->, with the edge information enclosed in parentheses, e.g., (Relation).
+        - Starting from the root node, the path is described step by step, including nodes and their relationships, until reaching the leaf node.
+        Below is the reasoning paths:
+        {reasoning_path_str}
 
         Please strictly follow the reference content to answer the question, applying logical reasoning as needed to generate the final answer.
         **Note**: The generated answer must not mention or disclose the existence of the reference content.
@@ -36,12 +43,19 @@ def generate_answer(question, reference="", model = "spark"):
     The user has input the following question:
     "{question}"
 
-    I will provide you with some reference content. Each reference contains two parts: *conditions* and *goals*. 
-    - Conditions: Information known from the user's question.
-    - Goals: The specific objectives the question aims to answer.
-
-    Here is the reference content:
-    {reference}
+    I can provide you with some reference content, where each set of content consists of two parts: conditions and objectives.
+    - Conditions: The known information from the question.
+    - Objectives: The goals that the question seeks to address.
+    Below is the conditions and objectives:
+    {last_node_str}
+        
+    I can also provide you the complete reasoning paths which maybe useful for you. I wish you cloud utilize your reasoning ability to answer users' question
+    - Each path is described by nodes and edges in the following format: [Entity Type] Entity Name -> (Relation) [Entity Type] Entity Name -> ...
+    - Each node includes [Entity Type] Entity Name.
+    - Each edge is represented by an arrow ->, with the edge information enclosed in parentheses, e.g., (Relation).
+    - Starting from the root node, the path is described step by step, including nodes and their relationships, until reaching the leaf node.
+    Below is the reasoning paths:
+    {reasoning_path_str}
 
     Please strictly follow the reference content to answer the question. Use logical reasoning if necessary to generate the final answer. 
     **Note**: The generated answer must not reveal or mention the existence of the reference content.

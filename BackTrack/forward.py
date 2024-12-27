@@ -4,6 +4,7 @@ from anytree import Node
 from anytree.exporter import DotExporter
 import random
 
+
 def dfs_paths(root):
     """深度优先搜索，获取所有路径（排除根节点）。"""
     paths = []
@@ -16,6 +17,20 @@ def dfs_paths(root):
             dfs(child, path[:])  # 深拷贝路径，避免修改
     dfs(root, [])
     return paths
+
+
+def format_path(path):
+    """将路径中的节点信息格式化为字符串。"""
+    formatted_path = []
+    for i, node in enumerate(path):
+        # 提取节点信息
+        node_info = f"[{node.label}] {node.name.split('/')[-1]}"
+        # 如果有 parent_edge，并且不是第一个节点，添加边的描述
+        if i > 0 and hasattr(node, 'parent_edge'):
+            edge_info = f" {node.parent_edge} "
+            node_info = edge_info + node_info
+        formatted_path.append(node_info)
+    return " -> ".join(formatted_path)
 
 
 def merge_paths(paths):
@@ -176,7 +191,8 @@ def forward(paths, conditions, driver, neo4j_database_name, aims, top_k):
 
 def rules_forward(rules, conditions, driver, neo4j_database_name, top_k):
 
-    result_str = ""
+    last_node_str = ""
+    reasoning_path_str = ""
 
     forward_root = Node("forward_root") # 因为每一个节点的邻居中满足next_label条件的可能有多个，用树的形式来组织更好。
 
@@ -199,6 +215,10 @@ def rules_forward(rules, conditions, driver, neo4j_database_name, top_k):
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 
     all_paths = dfs_paths(forward_root)  # 深度优先搜索所有路径
+
+    formatted_paths = [format_path(path) for path in all_paths] # 构建所有路径的描述
+    reasoning_path_str = "\n\n".join([f"reasoning path {i + 1}:\n{path}" for i, path in enumerate(formatted_paths)]) # 将路径组合成输入大模型的最终格式
+
     merged = merge_paths(all_paths)  # 按条件合并路径
 
     aims = []
@@ -206,7 +226,7 @@ def rules_forward(rules, conditions, driver, neo4j_database_name, top_k):
         aims.append(['', rule[-1]])
 
     filtered_merged = filter_results_by_aims(merged, aims)  # 从输出中筛选出 last Label 符合 aims 的路径
-    result_str = display_merged_results(filtered_merged)  # 汇总合并过滤后的结果为一个字符串
+    last_node_str = display_merged_results(filtered_merged)  # 汇总合并过滤后的结果为一个字符串
 
-    return result_str
+    return last_node_str, reasoning_path_str
         

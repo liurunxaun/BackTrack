@@ -43,19 +43,20 @@ def rule_base(question, max_pop, label_dict, label_description_path, entity_extr
 
     # 4. 正推生成实体路径
     print("\n======4. 正推生成实体路径======")
-    reference = forward.rules_forward(rules, conditions, driver, neo4j_database_name, top_k)
+    last_node_str, reasoning_path_str = forward.rules_forward(rules, conditions, driver, neo4j_database_name, top_k)
 
-    if reference != "":
-        print(reference)
+    if last_node_str != "" or reasoning_path_str != "":
+        print(last_node_str)
+        print(reasoning_path_str)
     else:
         print("没有匹配到实体")
         print("\n======5. 调用大模型生成最终答案======")
-        generation = answer.generate_answer(question, reference, generate_answer_model)
+        generation = answer.generate_answer(question, last_node_str, reasoning_path_str, generate_answer_model)
         success_excute_flag = 0
         return generation, success_excute_flag
 
     # 5. 调用大模型生成最终答案
     print("\n======5. 调用大模型生成最终答案======")
-    generation = answer.generate_answer(question, reference, generate_answer_model)
+    generation = answer.generate_answer(question, last_node_str, reasoning_path_str, generate_answer_model)
     success_excute_flag = 1
     return generation, success_excute_flag
