@@ -159,7 +159,8 @@ def forward(paths, conditions, driver, neo4j_database_name, aims, top_k):
                 todo:然后怎么处理，RAG？
     输出：具体推理路径
     """
-    result_str = ""
+    last_node_str = ""
+    reasoning_path_str = ""
 
     forward_root = Node("forward_root") # 因为每一个节点的邻居中满足next_label条件的可能有多个，用树的形式来组织更好。
 
@@ -181,12 +182,17 @@ def forward(paths, conditions, driver, neo4j_database_name, aims, top_k):
 
     # DotExporter(forward_root).to_picture("./output/reason_tree/forward.png")
 
-    paths = dfs_paths(forward_root)  # 深度优先搜索所有路径
-    merged = merge_paths(paths)  # 按条件合并路径
-    filtered_merged = filter_results_by_aims(merged, aims) # 从输出中筛选出 last Label 符合 aims 的路径
-    result_str = display_merged_results(filtered_merged)  # 汇总合并过滤后的结果为一个字符串
+    all_paths = dfs_paths(forward_root)  # 深度优先搜索所有路径
 
-    return result_str
+    formatted_paths = [format_path(path) for path in all_paths]  # 构建所有路径的描述
+    reasoning_path_str = "\n\n".join(
+        [f"reasoning path {i + 1}:\n{path}" for i, path in enumerate(formatted_paths)])  # 将路径组合成输入大模型的最终格式
+
+    merged = merge_paths(all_paths)  # 按条件合并路径
+    filtered_merged = filter_results_by_aims(merged, aims) # 从输出中筛选出 last Label 符合 aims 的路径
+    last_node_str = display_merged_results(filtered_merged)  # 汇总合并过滤后的结果为一个字符串
+
+    return last_node_str, reasoning_path_str
 
 
 def rules_forward(rules, conditions, driver, neo4j_database_name, top_k):

@@ -39,20 +39,21 @@ def back_track(question, max_pop, label_dict, label_description_path, entity_ext
 
     # 3. 正推找具体实体推理路径，筛选得到条件和目的实体
     print("\n======3. 正推具体实体推理路径，筛选得到条件和目的实体======")
-    reference = forward.forward(paths, conditions, driver, neo4j_database_name, aims, top_k)
+    last_node_str, reasoning_path_str = forward.forward(paths, conditions, driver, neo4j_database_name, aims, top_k)
 
-    if reference != "":
-        print(reference)
+    if last_node_str != "" or reasoning_path_str != "":
+        print(last_node_str)
+        print(reasoning_path_str)
     else:
         print("没有匹配到实体")
         print("\n======4. 调用大模型生成最终答案======")
-        generation = answer.generate_answer(question, reference, model)
+        generation = answer.generate_answer(question, last_node_str, reasoning_path_str, model)
         success_excute_flag = 0
         return generation, success_excute_flag
 
 
     # 4. 调用大模型生成最终答案
     print("\n======4. 调用大模型生成最终答案======")
-    generation = answer.generate_answer(question, reference, model)
+    generation = answer.generate_answer(question, last_node_str, reasoning_path_str, model)
     success_excute_flag = 1
     return generation, success_excute_flag
