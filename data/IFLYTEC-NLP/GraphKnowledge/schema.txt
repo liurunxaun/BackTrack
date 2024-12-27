@@ -7,11 +7,11 @@
 标题-(paper)adopts-方法
 标题-(paper)proposes-模型
 标题-(paper)works on-任务
-标题-(paper)innovates-创新点 point
+标题-(paper)innovates-创新点
 任务-(task)experiments on-数据集
 任务-(task)uses-指标
 任务-faces-问题
-方法-(method)innovates-创新点 point
+方法-(method)innovates-创新点
 方法-(method)proposes-模型
 方法-(method)works on-任务
 方法-(method)solves-问题

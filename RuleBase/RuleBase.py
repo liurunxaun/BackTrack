@@ -4,7 +4,8 @@ from BackTrack import forward
 from RuleBase import collect
 from RuleBase import select
 
-def rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, model, top_k):
+
+def rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver, neo4j_database_name, generate_answer_model, top_k):
     print(f"\n问题:{question}")
 
     # 1. 从问题中提取条件实体、目的实体、实体类型
@@ -16,7 +17,7 @@ def rule_base(question, max_pop, label_dict, label_description_path, entity_extr
     else:
         print("问题中不包含知识图谱范围内的条件")
         print("\n======2. 调用大模型生成最终答案======")
-        generation = answer.generate_answer(question, "", model)
+        generation = answer.generate_answer(question, "", generate_answer_model)
         success_excute_flag = 0
         return generation, success_excute_flag
 
@@ -31,13 +32,13 @@ def rule_base(question, max_pop, label_dict, label_description_path, entity_extr
     else:
         print("没找到抽象本体推理路径。请尝试换个说法，或者描述的更详细一些")
         print("\n======3. 调用大模型生成最终答案======")
-        generation = answer.generate_answer(question, "", model)
+        generation = answer.generate_answer(question, "", generate_answer_model)
         success_excute_flag = 0
         return generation, success_excute_flag
 
     # 3. 筛选对回答问题有帮助的问题
     print("\n======3. 大模型筛选对回答问题有帮助的路径======")
-    rules = select.select_rules(paths, question)
+    rules = select.select_rules(paths, question, aims)
     print(f"rules:\n{rules}")
 
     # 4. 正推生成实体路径
@@ -49,12 +50,12 @@ def rule_base(question, max_pop, label_dict, label_description_path, entity_extr
     else:
         print("没有匹配到实体")
         print("\n======5. 调用大模型生成最终答案======")
-        generation = answer.generate_answer(question, reference, model)
+        generation = answer.generate_answer(question, reference, generate_answer_model)
         success_excute_flag = 0
         return generation, success_excute_flag
 
     # 5. 调用大模型生成最终答案
     print("\n======5. 调用大模型生成最终答案======")
-    generation = answer.generate_answer(question, reference, model)
+    generation = answer.generate_answer(question, reference, generate_answer_model)
     success_excute_flag = 1
     return generation, success_excute_flag

@@ -7,7 +7,7 @@ from utils.LLM import spark as llm
 import re
 
 
-def select_rules(paths, question):
+def select_rules(paths, question, aims):
     """
     输入：全部条件的全部本体路径，用户的问题
     处理过程：一并交给大模型，筛选出回答问题有用的本体路径
@@ -35,6 +35,24 @@ def select_rules(paths, question):
         请返回筛选后的推理路径。
     """
 
+    query_English_wide_and_aim = f"""
+        Please filter the reasoning paths based on the user question and the given possible reasoning paths. For each path, only the relevant parts need to be included, and irrelevant parts can be omitted.
+
+        User question: {question}
+        Possible reasoning paths: {paths}
+        Problem intention: {aims}
+
+        Explanation:
+        - I have used a large model to extract known conditions from the user question.
+        - Starting from these known conditions, I performed a depth-first search in the domain knowledge graph to extract all reasoning paths that start with the labels of these conditions.
+        - Each path begins with a condition entity, and the path connects multiple entity labels.
+        - Besides, I also extract intentions of the problem. You can utilize them to filter paths.
+        
+        
+
+        Please return the filtered reasoning paths.
+    """
+
     query_English = f"""
         Please filter the reasoning paths based on the user question and the given possible reasoning paths. For each path, only the relevant parts need to be included, and irrelevant parts can be omitted.
 
@@ -54,7 +72,7 @@ def select_rules(paths, question):
         Please return the filtered reasoning paths.
     """
 
-    response = llm.spark_4_0(query_English)
+    response = llm.spark_4_0(query_English_wide_and_aim)
     
     print(f"response:\n{response}")
 

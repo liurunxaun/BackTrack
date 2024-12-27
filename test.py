@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
     # 使用不同数据集需要修改的参数
     test_dataset = "./data/IFLYTEC-NLP/test200/200_QA_多文档.csv"  # 要进行测试的数据集路径，注意是csv格式的
-    schema_text_path = "./data/IFLYTEC-NLP/GraphKnowledge/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label:entity_name-relation-label:entity_name
+    schema_text_path = "./data/IFLYTEC-NLP/GraphKnowledge/schema.txt"  # 所用知识图谱的关系定义文件，格式是：label-relation-label
     label_dict = back.build_label_dict(schema_text_path)
     label_description_path = "./data/IFLYTEC-NLP/GraphKnowledge/label_description.txt"
     entity_extract_example_path = "./data/IFLYTEC-NLP/GraphKnowledge/entity_extract_example.txt"
