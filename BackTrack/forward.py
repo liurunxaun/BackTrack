@@ -71,7 +71,7 @@ def display_merged_results(merged):
     """汇总合并过滤后的结果为一个字符串并返回。"""
     result_str = ""
     for first_key, last_groups in merged.items():
-        result_str += f"Conditions: {first_key}\n"
+        result_str += f"\nConditions: {first_key}\n"
         for last_label, last_nodes in last_groups.items():
             node_names = ", ".join(last_node.name for last_node in last_nodes)
             result_str += f"  Aims: {last_label}\n"
@@ -94,7 +94,8 @@ def neo4j_match(source_node, driver, neo4j_database_name, i, path, conditions, t
     # 执行查询
     with driver.session(database = neo4j_database_name) as session:
         # 由于iflytec_nlp的label是属性，所以分开
-        if neo4j_database_name == "neo4j": # ifytec_nlp在neo4j数据库使用的是默认数据库名称neo4j
+        if neo4j_database_name == "neo4j"  or "chatdoctor5k": # ifytec_nlp在neo4j数据库使用的是默认数据库名称neo4j
+            print(source_name,end_label)
             result = session.run(
                 """
                 MATCH (n)-[r]-(m)

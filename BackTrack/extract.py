@@ -59,7 +59,7 @@ def extract(question, label_description_path, entity_extract_example_path):
     请生成符合上述格式的答案：
     """
 
-    response = llm.spark_4_0(query)
+    response = llm.spark_4_0_company(query)
     print(f"大模型返回:\n{response}\n")
 
     conditions = []

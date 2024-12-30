@@ -1,0 +1,6 @@
+疾病-has_symptom-症状
+症状-possible_disease-疾病
+疾病-need_medical_test-医学检查
+医学检查-can_check_disease-疾病
+疾病-need_medication-药物
+药物-possible_cure_disease-疾病

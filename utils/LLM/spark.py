@@ -2,6 +2,7 @@ from sparkai.llm.llm import ChatSparkLLM
 from websocket import create_connection
 import time
 import json
+from time import sleep
 from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
 from sparkai.core.messages import ChatMessage
 
@@ -13,6 +14,19 @@ SPARKAI_API_SECRET = 'OTE2ODNhMjY1YmZhZjZlYjRlM2FiZGI0'
 SPARKAI_API_KEY = '7691129081cbdafccffe856aac0af6fd'
 SPARKAI_DOMAIN_4_0 = '4.0Ultra'
 
+SPARKAI_URL_lb = "wss://spark-api.xf-yun.com/v3.5/chat"
+SPARKAI_APP_ID_lb = '2597017a'
+SPARKAI_API_SECRET_lb = 'NzM2ZGZhMjZkMDM2NDg1NDk0YjZlYWVj'
+SPARKAI_API_KEY_lb = '74950dd6f4aede6248158f8cff2f8f21'
+SPARKAI_DOMAIN_lb = 'generalv3.5'
+spark3_5 = ChatSparkLLM(
+    spark_api_url=SPARKAI_URL_lb,
+    spark_app_id=SPARKAI_APP_ID_lb,
+    spark_api_key=SPARKAI_API_KEY_lb,
+    spark_api_secret=SPARKAI_API_SECRET_lb,
+    spark_llm_domain=SPARKAI_DOMAIN_lb,
+    streaming=False,
+)
 spark4_0 = ChatSparkLLM(
     spark_api_url=SPARKAI_URL_4_0,
     spark_app_id=SPARKAI_APP_ID,
@@ -28,10 +42,20 @@ def spark_4_0(query):
         role="user",
         content=query
     )]
+
     handler = ChunkPrintHandler()
     response = spark4_0.generate([messages], callbacks=[handler])
     return response.generations[0][0].text
 
+def spark_3_5(query):
+    messages = [ChatMessage(
+        role="user",
+        content=query
+    )]
+
+    handler = ChunkPrintHandler()
+    response = spark3_5.generate([messages], callbacks=[handler])
+    return response.generations[0][0].text
 
 def spark_4_0_company(query, ip_port='10.43.108.62:8678'):
     """
@@ -63,7 +87,6 @@ def spark_4_0_company(query, ip_port='10.43.108.62:8678'):
     # 打开 WebSocket 连接并发送数据
     wss = create_connection(url, header=headers, timeout=10)
     wss.send(json.dumps(data, ensure_ascii=False))
-
     try:
 
         final_response = ""  # 用于累积所有的response

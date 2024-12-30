@@ -1,0 +1,34 @@
+示例1:
+输入: 你好，医生。我觉得我可能患有 Turner syndrome？
+输出: Turner syndrome,疾病.medication,药物
+
+示例2:
+输入: 医生，我已经有Hoarse voice几个星期了，吃药也没有变好，这是什么问题？
+输出: Hoarse voice,症状.possible_disease,可能疾病
+
+示例3:
+输入: 医生，我的脚有 pain in my feet，而且感觉很平。我不确定是怎么回事。
+输出: Foot pain,症状.possible_disease,医学检查;medication,药物
+
+
+示例4:
+输入: 医生，我最近一直经历突然且频繁的 panic attacks。我不知道该怎么办。
+输出: panic attacks,症状.medical_test,医学检查;medication,药物
+
+示例5:
+输入: 医生，我认为我可能有thoracic aortic aneurysm。你可以告诉我我需要去检查什么吗？
+输出: thoracic aortic aneurysm,疾病.medical_test,医学检查
+
+示例6:
+输入: 医生，我最近一直感觉非常fatigued，并且我的abdomen swollen and tender。我也经历jaundice in my eyes。这是一个什么问题？
+输出: fatigued,症状;Abdominal swelling,症状;Abdominal tenderness,症状;jaundice,症状.possible_disease,可能疾病
+
+示例7:
+输入: 医生，我最近在经历一个情况叫cryptorchidism，并且我的testicles can not into the scrotum。我需要去检查什么吗？
+输出: cryptorchidism,疾病;Undescended testicles,症状.medical_test,医学检查
+
+示例8:
+输入: 医生，我的eye red and painful，并且我的vision has been affected also。我认为我可能有endophthalmitis.
+输出: Eye redness,症状;Eye pain,症状;Vision loss,症状;endophthalmitis,疾病.medical_test,医学检查;medication,药物
+
+

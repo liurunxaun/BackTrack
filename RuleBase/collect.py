@@ -40,5 +40,5 @@ def collect_paths(conditions,  max_pop, label_dict):
         # 移除 root 并反转路径
         if paths[i][0] == "root":
             paths[i] = paths[i][1:]  # 去掉 root 节点
-
-    return paths
+    unique_paths = list(map(list, set(tuple(path) for path in paths)))  # 对子列表去重
+    return unique_paths
