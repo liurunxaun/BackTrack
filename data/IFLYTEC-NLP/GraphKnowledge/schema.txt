@@ -25,3 +25,5 @@
 模型-(model)works on-任务
 模型-(model)solves-问题
 标题-ID-id
+标题-direct use-标题
+标题-task association-标题

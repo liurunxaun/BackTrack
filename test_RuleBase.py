@@ -21,7 +21,7 @@ if __name__ == "__main__":
     entity_extract_example_path = "./data/IFLYTEC-NLP/GraphKnowledge/entity_extract_example.txt"
     neo4j_database_name = "neo4j"
 
-    question = "Model English for mechanical translation的创新点"
+    question = "论文Linguistic Knowledge Generator和论文Better Translation with Knowledge Extracted from Source Text，谁的Accuracy更高"
     answer, successFlag = RuleBase.rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver,
               neo4j_database_name, generate_answer_model, top_k)
     print(answer)

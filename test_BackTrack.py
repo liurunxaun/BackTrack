@@ -21,7 +21,7 @@ if __name__ == "__main__":
     entity_extract_example_path = "./data/IFLYTEC-NLP/GraphKnowledge/entity_extract_example.txt"
     neo4j_database_name = "neo4j"
 
-    question = "Model English for mechanical translation的创新点"
+    question = "Model English for mechanical translation和Microsemantics谁的直接使用的论文更多？"
     answer, successFlag = BackTrack.back_track(question, max_pop, label_dict, label_description_path, entity_extract_example_path, driver,
               neo4j_database_name, generate_answer_model, top_k)
     print(answer)
