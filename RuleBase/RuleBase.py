@@ -1,7 +1,6 @@
 from BackTrack import extract
 from BackTrack import answer
 from BackTrack import forward
-from BackTrack import entity_retriever
 from RuleBase import collect
 from RuleBase import select
 
@@ -12,6 +11,7 @@ def rule_base(question, max_pop, embedding_flag, label_dict, label_description_p
     print("\n======1. 从问题中提取条件实体和实体类型======")
     conditions, aims = extract.extract(question, label_description_path, entity_extract_example_path)
     if embedding_flag == "true":
+        from BackTrack import entity_retriever
         conditions = entity_retriever.retrieve_matching_entities(conditions)
 
     if len(conditions) != 0:

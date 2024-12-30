@@ -24,5 +24,5 @@ if __name__ == "__main__":
     ReferenceTemplate_path = "./data/Cardiovascular/ReferenceTemplate.txt"
 
     question = "论文Linguistic Knowledge Generator和论文Better Translation with Knowledge Extracted from Source Text，谁的Accuracy更高"
-    answer, successFlag = RuleBase.rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, generate_answer_model, top_k)
+    answer, successFlag = RuleBase.rule_base(question, max_pop, embedding_flag, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, generate_answer_model, top_k)
     print(answer)
