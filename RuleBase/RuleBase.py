@@ -5,13 +5,14 @@ from BackTrack import entity_retriever
 from RuleBase import collect
 from RuleBase import select
 
-def rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k):
+def rule_base(question, max_pop, embedding_flag, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k):
     print(f"\n问题:{question}")
 
     # 1. 从问题中提取条件实体、目的实体、实体类型
     print("\n======1. 从问题中提取条件实体和实体类型======")
     conditions, aims = extract.extract(question, label_description_path, entity_extract_example_path)
-    conditions = entity_retriever.retrieve_matching_entities(conditions)
+    if embedding_flag == "true":
+        conditions = entity_retriever.retrieve_matching_entities(conditions)
 
     if len(conditions) != 0:
         print(f"匹配完之后的conditions:{conditions}")

@@ -4,13 +4,14 @@ from BackTrack import forward as forward
 from BackTrack import answer as answer
 from BackTrack import entity_retriever
 
-def back_track(question, max_pop, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k):
+def back_track(question, max_pop, embedding_flag, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k):
     print(f"\n问题:{question}")
 
     # 1. 从问题中提取条件实体、目的实体、实体类型
     print("\n======1. 从问题中提取条件实体、目的实体、实体类型======")
     conditions, aims = extract.extract(question, label_description_path, entity_extract_example_path)
-    conditions = entity_retriever.retrieve_matching_entities(conditions)
+    if embedding_flag == "true":
+        conditions = entity_retriever.retrieve_matching_entities(conditions)
 
     if len(conditions) != 0 and len(aims) != 0:
         print(f"conditions:{conditions}")

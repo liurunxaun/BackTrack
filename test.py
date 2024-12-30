@@ -23,7 +23,7 @@ def write_results_to_csv(output_file, data):
     df.to_csv(output_file, mode='a', header=False, index=False)  # 始终禁用表头和行索引写入
 
 
-def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, output_file, metric, questions, reference_answers):
+def evaluate_and_save_results(df, method, max_pop, top_k, model, embedding_flag, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, output_file, metric, questions, reference_answers):
     """
     Evaluate the answers and save the results in the specified file.
     """
@@ -48,9 +48,9 @@ def evaluate_and_save_results(df, method, max_pop, top_k, model, label_dict, lab
         try:
             # Call BackTrack or RuleBase based on the method
             if method == "BackTrack":
-                final_answer, success_excute_flag = BackTrack.back_track(question, max_pop, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k)
+                final_answer, success_excute_flag = BackTrack.back_track(question, max_pop, embedding_flag, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k)
             elif method == "RuleBase":
-                final_answer, success_excute_flag = RuleBase.rule_base(question, max_pop, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k)
+                final_answer, success_excute_flag = RuleBase.rule_base(question, max_pop, embedding_flag, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, model, top_k)
             elif method == "Spark":
                 final_answer = answer.generate_answer(question, "","spark")
                 success_excute_flag = 0
@@ -139,6 +139,7 @@ if __name__ == "__main__":
     max_pop = 5  # 构建推理树时最大的推理跳数
     top_k = 5  # 如果一个实体满足next_label的邻居有多个，最多取top_k个
     generate_answer_model = "spark"  # 选择生成最终答案使用的模型。包括：spark, gpt-4o-mini（提取条件和目的就使用spark，因为便宜，而且效果也还不错）
+    embedding_flag = "true" # 选择是否匹配向量
 
     # 使用不同数据集需要修改的参数
     root_path = "/Users/yanzhenxing/Desktop/科大-讯飞/code_RAG/BackTrack-master/data/chatdoctor5k"
@@ -151,6 +152,7 @@ if __name__ == "__main__":
     df = pd.read_csv(test_dataset)[233:].reset_index(drop=True)
     questions = df["query_en"]
     reference_answers = df["answer_en"]
+
     metric = "BERTScore"  # 选择实验的指标，包括：BERTScore
     output_file = create_output_file(output_dir, method, generate_answer_model, max_pop, top_k, timestamp)
-    evaluate_and_save_results(df, method, max_pop, top_k, generate_answer_model, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, output_file, metric, questions, reference_answers)
+    evaluate_and_save_results(df, method, max_pop, top_k, generate_answer_model, embedding_flag, label_dict, label_description_path, entity_extract_example_path, ReferenceTemplate_path, driver, neo4j_database_name, output_file, metric, questions, reference_answers)
