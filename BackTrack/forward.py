@@ -87,64 +87,91 @@ def neo4j_match(source_node, driver, neo4j_database_name, i, path, conditions, t
     source_name = source_node.name
     end_label = path[i]
 
-    # for condition in conditions:
-    #     if condition[1] == end_label:
+    neighbor_list = []
+
+    # 看看这次要找的是不是在条件里用作筛选条件
+    for condition in conditions:
+        relation = ""
+        if condition[1] == end_label:
+            with driver.session(database=neo4j_database_name) as session:
+                if neo4j_database_name == "neo4j" or "chatdoctor5k":
+                    print(source_name, condition[0], end_label)
+                    result = session.run(
+                        """
+                        MATCH (n)-[r]-(m)
+                        WHERE n.name = $source_name AND m.name = $condition_name AND m.label = $end_label
+                        RETURN type(r) AS relation
+                        """,
+                        source_name=source_name,
+                        condition_name=condition[0],
+                        end_label=end_label
+                    )
+
+                for record in result:
+                    relation = record["relation"]  # 通过键名访问值
+
+        if relation != "":
+            neighbor_list.append(condition[0])
+
+    sampled_neighbors = neighbor_list
 
 
-    # 执行查询
-    with driver.session(database = neo4j_database_name) as session:
-        # 由于iflytec_nlp的label是属性，所以分开
-        if neo4j_database_name == "neo4j"  or "chatdoctor5k": # ifytec_nlp在neo4j数据库使用的是默认数据库名称neo4j
-            print(source_name,end_label)
-            result = session.run(
-                """
-                MATCH (n)-[r]-(m)
-                WHERE n.name = $source_name AND m.label = $end_label
-                RETURN collect(m.name) AS neighbors, type(r) AS relation
-                """,
-                source_name=source_name,
-                end_label=end_label
-            )
+    if relation == '' and len(neighbor_list) == 0:
+        # 执行查询
+        with driver.session(database = neo4j_database_name) as session:
+            # 由于iflytec_nlp的label是属性，所以分开
+            if neo4j_database_name == "neo4j"  or "chatdoctor5k": # ifytec_nlp在neo4j数据库使用的是默认数据库名称neo4j
+                # print(source_name,end_label)
+                result = session.run(
+                    """
+                    MATCH (n)-[r]-(m)
+                    WHERE n.name = $source_name AND m.label = $end_label
+                    RETURN collect(m.name) AS neighbors, type(r) AS relation
+                    """,
+                    source_name=source_name,
+                    end_label=end_label
+                )
 
-        elif neo4j_database_name == "cardiovascularMini":
-            result = session.run(
-                """
-                MATCH (n)-[r]-(m)
-                WHERE n.name = $source_name AND $end_label IN labels(m)
-                RETURN collect(m.name) AS neighbors, type(r) AS relation
-                """,
-                source_name=source_name,
-                end_label=end_label
-            )
+            elif neo4j_database_name == "cardiovascularMini":
+                result = session.run(
+                    """
+                    MATCH (n)-[r]-(m)
+                    WHERE n.name = $source_name AND $end_label IN labels(m)
+                    RETURN collect(m.name) AS neighbors, type(r) AS relation
+                    """,
+                    source_name=source_name,
+                    end_label=end_label
+                )
 
-        neighbor_list = []
-        relation = ''
+            neighbor_list = []
+            relation = ''
 
-        # 遍历查询结果
-        for record in result:
-            neighbor_list = record["neighbors"]  # 获取邻居列表
-            relation = record["relation"]  # 获取关系名
+            # 遍历查询结果
+            for record in result:
+                neighbor_list = record["neighbors"]  # 获取邻居列表
+                relation = record["relation"]  # 获取关系名
 
-        # 如果邻居列表超过10条，从中随机选取10条
-        # todo:考虑采用什么策略，选择路径。两种考量：1是有可能用户问“还有呢？”。2是选取相关的，用户最关心的
-        if len(neighbor_list) > top_k:
-            sampled_neighbors = random.sample(neighbor_list, top_k)
-        else:
-            sampled_neighbors = neighbor_list
 
-        if relation != '' and len(sampled_neighbors) != 0:
-            # r = Node("relation:" + relation, parent=source_node)
-            # label = Node("label:" + end_label, parent=r)
+            # 如果邻居列表超过10条，从中随机选取10条
+            # todo:考虑采用什么策略，选择路径。两种考量：1是有可能用户问“还有呢？”。2是选取相关的，用户最关心的
+            if len(neighbor_list) > top_k:
+                sampled_neighbors = random.sample(neighbor_list, top_k)
+            else:
+                sampled_neighbors = neighbor_list
 
-            for neighbor in sampled_neighbors:
-                n = Node(neighbor, parent=source_node, label=path[i], parent_edge=relation)
+    if relation != '' and len(sampled_neighbors) != 0:
+        # r = Node("relation:" + relation, parent=source_node)
+        # label = Node("label:" + end_label, parent=r)
 
-            for child in source_node.children:
-                neo4j_match(child, driver, neo4j_database_name, i, path, conditions, top_k)
+        for neighbor in sampled_neighbors:
+            n = Node(neighbor, parent=source_node, label=path[i], parent_edge=relation)
 
-        else:
-            # todo: 采用其他方式
-            return
+        for child in source_node.children:
+            neo4j_match(child, driver, neo4j_database_name, i, path, conditions, top_k)
+
+    else:
+        # todo: 采用其他方式
+        return
 
 
 def forward(paths, conditions, driver, neo4j_database_name, aims, top_k):

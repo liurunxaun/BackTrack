@@ -19,6 +19,7 @@ SPARKAI_APP_ID_lb = '2597017a'
 SPARKAI_API_SECRET_lb = 'NzM2ZGZhMjZkMDM2NDg1NDk0YjZlYWVj'
 SPARKAI_API_KEY_lb = '74950dd6f4aede6248158f8cff2f8f21'
 SPARKAI_DOMAIN_lb = 'generalv3.5'
+
 spark3_5 = ChatSparkLLM(
     spark_api_url=SPARKAI_URL_lb,
     spark_app_id=SPARKAI_APP_ID_lb,
@@ -27,6 +28,7 @@ spark3_5 = ChatSparkLLM(
     spark_llm_domain=SPARKAI_DOMAIN_lb,
     streaming=False,
 )
+
 spark4_0 = ChatSparkLLM(
     spark_api_url=SPARKAI_URL_4_0,
     spark_app_id=SPARKAI_APP_ID,
